@@ -1,6 +1,7 @@
 package tutorial;
 
 import com.almasb.fxgl.dsl.FXGL;
+import com.almasb.fxgl.dsl.components.ExpireCleanComponent;
 import com.almasb.fxgl.dsl.components.OffscreenCleanComponent;
 import com.almasb.fxgl.dsl.components.ProjectileComponent;
 import com.almasb.fxgl.dsl.components.RandomMoveComponent;
@@ -11,6 +12,7 @@ import com.almasb.fxgl.entity.Spawns;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.shape.Rectangle;
+import javafx.util.Duration;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -47,7 +49,12 @@ public class GameEntityFactory implements EntityFactory {
 
     @Spawns("bullet")
     public Entity newBullet(SpawnData data) {
+        //var
         Point2D dir = data.get("dir");
+
+        //sound
+        play("shoot.wav");
+        //loopBGM("hiereineMp3Datei");
 
         return entityBuilder()
                 .type(EntityType.BULLET)
@@ -56,6 +63,18 @@ public class GameEntityFactory implements EntityFactory {
                 .with(new ProjectileComponent(dir, 500))
                 .with(new OffscreenCleanComponent())
                 .collidable()
+                .build();
+    }
+
+    @Spawns("explosion")
+    public Entity newExplosion(SpawnData data) {
+        //sound
+        play("explosion.wav");
+
+        return entityBuilder()
+                .from(data)
+                .view(texture("explosion.png").toAnimatedTexture(16, Duration.seconds(0.66)).play())
+                .with(new ExpireCleanComponent(Duration.seconds(0.66)))
                 .build();
     }
 }

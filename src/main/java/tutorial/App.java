@@ -6,9 +6,12 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.SpawnData;
-import javafx.animation.Interpolator;
+import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.util.Duration;
+
+
+import java.util.Map;
 
 import static com.almasb.fxgl.dsl.FXGL.*;
 
@@ -31,11 +34,18 @@ public class App extends GameApplication {
         onKey(KeyCode.W, () -> player.getComponent(PlayerComponent.class).move());
 
         onKeyDown(KeyCode.SPACE, "Shoot", () -> player.getComponent(PlayerComponent.class).shoot());
+    }
 
+    @Override
+    protected void initGameVars(Map<String, Object> vars) {
+        vars.put("score", 0);
+        vars.put("lives", 3);
     }
 
     @Override
     protected void initGame() {
+        getSettings().setGlobalSoundVolume(0.1);
+
         getGameWorld().addEntityFactory(new GameEntityFactory());
 
         spawn("background");
@@ -54,9 +64,20 @@ public class App extends GameApplication {
     @Override
     protected void initPhysics() {
         onCollisionBegin(EntityType.BULLET, EntityType.ASTEROID, (bullet, asteroid) -> {
+            Point2D explosionSpawnPoint = asteroid.getCenter().subtract(64, 64);
+
+            spawn("explosion", explosionSpawnPoint);
+
             bullet.removeFromWorld();
             asteroid.removeFromWorld();
+
+            inc("score", + 100);
         });
+    }
+
+    @Override
+    protected void initUI() {
+        addVarText("score", 50, 50);
     }
 
     public static void main(String[] args) {
